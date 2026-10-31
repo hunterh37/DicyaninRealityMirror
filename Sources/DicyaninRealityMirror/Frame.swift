@@ -47,11 +47,14 @@ public struct MirrorFrame<State: Codable & Sendable>: Codable, Sendable {
 
 /// Wire envelope. Events are discrete one-shots (play sound, spawn burst) that
 /// must not be lost to interpolation.
-public enum MirrorMessage<State: Codable & Sendable, Event: Codable & Sendable>: Codable, Sendable {
+public enum MirrorMessage<State: Codable & Sendable, Event: Codable & Sendable,
+                          Input: Codable & Sendable>: Codable, Sendable {
     case hello(appID: String, version: Int)
     case frame(MirrorFrame<State>)
     case event(Event)
     case route(String)
+    /// Phone to headset. The headset stays authoritative and decides what to do.
+    case input(Input)
 }
 
 extension simd_quatf: @retroactive Codable {

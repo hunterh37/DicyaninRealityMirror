@@ -10,6 +10,8 @@ import RealityKit
 public protocol RealityMirrorProviding: AnyObject {
     associatedtype State: Codable & Sendable = MirrorNone
     associatedtype Event: Codable & Sendable = MirrorNone
+    /// Phone to headset uplink payload.
+    associatedtype Input: Codable & Sendable = MirrorNone
 
     /// Stable id. Both devices refuse to pair when ids differ.
     var mirrorAppID: String { get }

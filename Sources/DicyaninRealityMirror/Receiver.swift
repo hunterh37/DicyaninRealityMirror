@@ -5,7 +5,7 @@ import Observation
 /// Phone side. Decodes frames and drives the locally built mirror root.
 @MainActor @Observable
 public final class MirrorReceiver<Provider: RealityMirrorProviding> {
-    public typealias Message = MirrorMessage<Provider.State, Provider.Event>
+    public typealias Message = MirrorMessage<Provider.State, Provider.Event, Provider.Input>
 
     public enum Status: Equatable, Sendable {
         case searching, connected, mismatch(String), live
@@ -41,6 +41,12 @@ public final class MirrorReceiver<Provider: RealityMirrorProviding> {
     }
 
     public func stop() { transport.stop() }
+
+    /// Sends a phone input to the headset over the reliable channel.
+    public func send(input: Provider.Input) {
+        guard let data = try? MirrorCodec.encode(Message.input(input)) else { return }
+        transport.sendReliable(data)
+    }
 
     private func peerChanged(_ up: Bool) {
         if case .mismatch = status, up { return }
@@ -81,6 +87,8 @@ public final class MirrorReceiver<Provider: RealityMirrorProviding> {
             provider.handle(event, root: root)
         case let .route(route):
             provider.open(route: route, root: root)
+        case .input:
+            break
         }
     }
 
