@@ -5,7 +5,7 @@ import QuartzCore
 /// Headset side. Samples tagged entities plus provider state at `rate` Hz.
 @MainActor
 public final class MirrorBroadcaster<Provider: RealityMirrorProviding> {
-    public typealias Message = MirrorMessage<Provider.State, Provider.Event>
+    public typealias Message = MirrorMessage<Provider.State, Provider.Event, Provider.Input>
 
     public let provider: Provider
     public let transport: MirrorTransport
@@ -15,6 +15,8 @@ public final class MirrorBroadcaster<Provider: RealityMirrorProviding> {
     public var leftHand: MirrorPose?
     public var rightHand: MirrorPose?
     public private(set) var isConnected = false
+    /// Phone uplink. Called on the main actor for every `.input` received.
+    public var onInput: ((Provider.Input) -> Void)?
 
     private weak var root: Entity?
     private var timer: Timer?
@@ -29,6 +31,9 @@ public final class MirrorBroadcaster<Provider: RealityMirrorProviding> {
         transport.onPeerChange = { [weak self] up in
             Task { @MainActor in self?.peerChanged(up) }
         }
+        transport.onReceive = { [weak self] data in
+            Task { @MainActor in self?.receive(data) }
+        }
         transport.start()
         timer = Timer.scheduledTimer(withTimeInterval: 1 / rate, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.sample() }
@@ -39,6 +44,16 @@ public final class MirrorBroadcaster<Provider: RealityMirrorProviding> {
 
     public func send(event: Provider.Event) { sendReliable(.event(event)) }
     public func send(route: String) { sendReliable(.route(route)) }
+
+    func receive(_ data: Data) {
+        guard let m = try? MirrorCodec.decode(data, as: Message.self) else { return }
+        handle(m)
+    }
+
+    /// Applies an inbound message. Public for tests and manual stepping.
+    public func handle(_ message: Message) {
+        if case let .input(input) = message { onInput?(input) }
+    }
 
     private func peerChanged(_ up: Bool) {
         isConnected = up

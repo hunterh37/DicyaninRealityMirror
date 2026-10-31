@@ -35,7 +35,7 @@ final class RoundTripTests: XCTestCase {
         hRoot.children[0].position = [1, 2, 3]
         headset.score = 7
         let frame = try XCTUnwrap(tx.makeFrame())
-        let data = try MirrorCodec.encode(MirrorMessage<DemoProvider.State, MirrorNone>.frame(frame))
+        let data = try MirrorCodec.encode(MirrorMessage<DemoProvider.State, MirrorNone, MirrorNone>.frame(frame))
         rx.receive(data)
 
         XCTAssertEqual(pRoot.children[0].position, [1, 2, 3])

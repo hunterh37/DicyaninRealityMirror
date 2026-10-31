@@ -34,11 +34,11 @@ public final class LoopbackTransport: MirrorTransport, @unchecked Sendable {
 }
 
 enum MirrorCodec {
-    static func encode<S, E>(_ m: MirrorMessage<S, E>) throws -> Data {
+    static func encode<S, E, I>(_ m: MirrorMessage<S, E, I>) throws -> Data {
         try PropertyListEncoder.binary.encode(m)
     }
-    static func decode<S, E>(_ d: Data, as: MirrorMessage<S, E>.Type) throws -> MirrorMessage<S, E> {
-        try PropertyListDecoder().decode(MirrorMessage<S, E>.self, from: d)
+    static func decode<S, E, I>(_ d: Data, as: MirrorMessage<S, E, I>.Type) throws -> MirrorMessage<S, E, I> {
+        try PropertyListDecoder().decode(MirrorMessage<S, E, I>.self, from: d)
     }
 }
 

@@ -28,7 +28,7 @@ final class FullProvider: RealityMirrorProviding {
     func open(route: String, root: Entity) { routes.append(route) }
 }
 
-typealias Msg = MirrorMessage<FullProvider.State, FullProvider.Event>
+typealias Msg = MirrorMessage<FullProvider.State, FullProvider.Event, MirrorNone>
 
 @MainActor
 final class ValidationTests: XCTestCase {
@@ -75,7 +75,7 @@ final class ValidationTests: XCTestCase {
 
     func testFrameSizeFor100Entities() throws {
         let f = MirrorFrame<MirrorNone>(tick: 1, time: 0, entities: (0..<100).map { ent("e\($0)", [1, 2, 3]) })
-        let size = try MirrorCodec.encode(MirrorMessage<MirrorNone, MirrorNone>.frame(f)).count
+        let size = try MirrorCodec.encode(MirrorMessage<MirrorNone, MirrorNone, MirrorNone>.frame(f)).count
         XCTAssertLessThan(size, 60_000, "frame \(size) B")
     }
 
