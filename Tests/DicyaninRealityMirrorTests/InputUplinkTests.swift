@@ -32,3 +32,14 @@ final class InputUplinkTests: XCTestCase {
         XCTAssertEqual(i, .tap([0, 1, 2]))
     }
 }
+
+final class TimelineTests: XCTestCase {
+    func testSlowMoStretchesAndOffsets() {
+        let t = Timeline(); t.begin(at: 10)
+        XCTAssertEqual(t.map(11, isVideo: true)!, 1, accuracy: 1e-9)
+        t.requestSlowMo(duration: 1, factor: 4)
+        XCTAssertEqual(t.map(11.5, isVideo: true)!, 3, accuracy: 1e-9)   // window opened at 11
+        XCTAssertNil(t.map(11.6, isVideo: false))
+        XCTAssertEqual(t.map(12.5, isVideo: true)!, 5.5, accuracy: 1e-9) // 1 s stretched to 4 s
+    }
+}
